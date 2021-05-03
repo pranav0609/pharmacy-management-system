@@ -69,8 +69,6 @@ class Registration:
         
         def Record_Add():
             Ref_no_Generator()
-            self.txtReceipt.insert(END, "\t\t" + Ref.get()+ "\t\t" + Firstname.get() + "\t\t" + Surname.get() +
-            "\t\t"+Address.get()+"\t\t"+DateOfOrder.get() + "\t\t"+ telephone.get()+"\n")
             patient_id = Ref.get()
             patient_name = Firstname.get()
             patient_address = Address.get()
@@ -81,7 +79,10 @@ class Registration:
             if(patient_id=="" or patient_name=="" or patient_address=="" or patient_tele==""or patient_dob==""or patient_room==0 or adhaar_number==""):
                 tkinter.messagebox.showinfo("inert status", "all fields are not filled")
             else:
-                connection = MySQLdb.connect(host='localhost', user='root', password='shubham1701')
+                
+                self.txtReceipt.insert(END, "\t\t" + Ref.get()+ "\t\t" + Firstname.get() + "\t\t" + Surname.get() +
+            "\t\t"+Address.get()+"\t\t"+DateOfOrder.get() + "\t\t"+ telephone.get()+"\n")
+                connection = MySQLdb.connect(host='localhost', user='root', password='12345')
                 string = "use pythondb"
                 cursor = connection.cursor()
                 cursor.execute(string)
