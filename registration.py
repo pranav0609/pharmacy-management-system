@@ -1,3 +1,4 @@
+import MySQLdb
 from tkinter import *
 from tkinter import ttk
 import random
@@ -22,12 +23,12 @@ class Registration:
         Firstname = StringVar()
         Surname = StringVar()
         Address = StringVar()
-        PsotalCode = StringVar()
+        DOB = StringVar()
         telephone = StringVar()
         Ref = StringVar()
 
-        membership = StringVar()
-        membership.set("0")
+        adhar = StringVar()
+        adhar.set("0")
 
         #===============Functions==================
         def iExit():
@@ -40,10 +41,10 @@ class Registration:
             Firstname.set("")
             Surname.set("")
             Address.set("")
-            PsotalCode.set("")
+            DOB.set("")
             telephone.set("")
             Ref.set("")
-            membership.set("0")
+            adhar.set("0")
 
             var1.set("")
             var2.set("")
@@ -70,6 +71,29 @@ class Registration:
             Ref_no_Generator()
             self.txtReceipt.insert(END, "\t\t" + Ref.get()+ "\t\t" + Firstname.get() + "\t\t" + Surname.get() +
             "\t\t"+Address.get()+"\t\t"+DateOfOrder.get() + "\t\t"+ telephone.get()+"\n")
+            patient_id = Ref.get()
+            patient_name = Firstname.get()
+            patient_address = Address.get()
+            patient_tele = telephone.get()
+            patient_dob = DOB.get()
+            adhaar_number = adhar.get()
+            patient_room = 3
+            if(patient_id=="" or patient_name=="" or patient_address=="" or patient_tele==""or patient_dob==""or patient_room==0 or adhaar_number==""):
+                tkinter.messagebox.showinfo("inert status", "all fields are not filled")
+            else:
+                connection = MySQLdb.connect(host='localhost', user='root', password='shubham1701')
+                string = "use pythondb"
+                cursor = connection.cursor()
+                cursor.execute(string)
+                
+                string = "insert into patients values('%s','%s', '%s', '%s', '%d', '%s', '%s')"
+                args = (patient_name, patient_id, patient_dob, adhaar_number, patient_room, patient_address, patient_tele)
+                cursor.execute(string % args)
+                connection.commit()
+                tkinter.messagebox.showinfo("insert status", "patient inserted successfully")
+                cursor.close()
+                
+
 
 
     #=========================Frames=========================
@@ -114,9 +138,9 @@ class Registration:
          insertwidth=2)
         self.txtLastName.grid(row=2, column=1)
         
-        self.lblPostalCode = Label(MembersName_F, font=('arial', 14, 'bold'), text="Password", bd = 7)
+        self.lblPostalCode = Label(MembersName_F, font=('arial', 14, 'bold'), text="DOB", bd = 7)
         self.lblPostalCode.grid(row=3, column=0)
-        self.txtPostalCode = Entry(MembersName_F, font=('arial', 14, 'bold'),  bd=7, textvariable=PsotalCode,
+        self.txtPostalCode = Entry(MembersName_F, font=('arial', 14, 'bold'),  bd=7, textvariable=DOB,
          insertwidth=2)
         self.txtPostalCode.grid(row=3, column=1)
         
@@ -131,39 +155,45 @@ class Registration:
         self.txtTele = Entry(MembersName_F, font=('arial', 14, 'bold'),  bd=7, textvariable=telephone,
          insertwidth=2)
         self.txtTele.grid(row=5, column=1)
+
+        self.lblAdhar = Label(MembersName_F, font=('arial', 14, 'bold'), text="Adhar no", bd = 7)
+        self.lblAdhar.grid(row=6, column=0)
+        self.txtAdhar = Entry(MembersName_F, font=('arial', 14, 'bold'),  bd=7, textvariable=adhar,
+         insertwidth=2)
+        self.txtAdhar.grid(row=6, column=1)
         
         self.lblDate = Label(MembersName_F, font=('arial', 14, 'bold'), text="Date", bd = 7)
-        self.lblDate.grid(row=6, column=0)
+        self.lblDate.grid(row=7, column=0)
         self.txtDate = Entry(MembersName_F, font=('arial', 14, 'bold'),  bd=7, textvariable=DateOfOrder,
          insertwidth=2)
-        self.txtDate.grid(row=6, column=1)
+        self.txtDate.grid(row=7, column=1)
         
         #===============================================
 
         #===================Member info================
         self.lblProveOfID = Label(MembersName_F, font=('arial', 14, 'bold'), text="Proof of identity", bd = 7)
-        self.lblProveOfID.grid(row=7, column=0)
+        self.lblProveOfID.grid(row=8, column=0)
 
         self.cboProofOfID = ttk.Combobox(MembersName_F, textvariable=var1, state='readonly', font=('arial', 14, 'bold'), width=19)
         self.cboProofOfID['value'] = ('', 'Drivers license', 'electricity bill', 'adhar card', 'passport')
         self.cboProofOfID.current(0)
-        self.cboProofOfID.grid(row=7, column=1)
+        self.cboProofOfID.grid(row=8, column=1)
 
         self.lblTypeOfMember = Label(MembersName_F, font=('arial', 14, 'bold'), text="Type of membership", bd = 7)
-        self.lblTypeOfMember.grid(row=8, column=0)
+        self.lblTypeOfMember.grid(row=9, column=0)
 
         self.cboTypeOfMember = ttk.Combobox(MembersName_F, textvariable=var2, state='readonly', font=('arial', 14, 'bold'), width=19)
         self.cboTypeOfMember['value'] = ('', 'Monthly member', 'annual member', 'weekly member', 'other')
         self.cboTypeOfMember.current(0)
-        self.cboTypeOfMember.grid(row=8, column=1)
+        self.cboTypeOfMember.grid(row=9, column=1)
 
         self.lblMethodOfpayment = Label(MembersName_F, font=('arial', 14, 'bold'), text="Payment method", bd = 7)
-        self.lblMethodOfpayment.grid(row=9, column=0)
+        self.lblMethodOfpayment.grid(row=10, column=0)
 
         self.cboMethodofPayment = ttk.Combobox(MembersName_F, textvariable=var3, state='readonly', font=('arial', 14, 'bold'), width=19)
         self.cboMethodofPayment['value'] = ('', 'Cash', 'Credit card', 'Debit  card', 'UPI wallets')
         self.cboMethodofPayment.current(0)
-        self.cboMethodofPayment.grid(row=9, column=1)
+        self.cboMethodofPayment.grid(row=10, column=1)
 
         #==============Receipt=====================
         self.lblLabel = Label(ReceiptButtomFrame, font=('arial', 10, 'bold'), pady=10, 
