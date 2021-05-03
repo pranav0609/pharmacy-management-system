@@ -1,3 +1,4 @@
+import MySQLdb
 from tkinter import *
 import tkinter.messagebox
 from tkinter import ttk
@@ -5,8 +6,14 @@ import random
 import time
 import datetime
 
+connection = MySQLdb.connect(host='localhost', user='root', password='shubham1701')
+cursor = connection.cursor()
+
+
 # dummy
 def main():
+    string = "use pythondb"
+    cursor.execute(string)
     root = Tk()
     app = Window1(root)
     root.mainloop()
@@ -76,12 +83,30 @@ class Window1:
         user = (self.Username.get())
         pass_word = (self.Password.get())
 
-        if user == str(12345) and pass_word == str(12345):
-            self.patient_button.config(state=NORMAL)
-            self.hospital_button.config(state=NORMAL)
+        string = 'select username from users where username="%s"'
+        arg1 = (user,)
+        cursor.execute(string % arg1)
+        checker1 = cursor.fetchone()
+        if checker1 is not None:
+            # checking whether the password for the username is valid or not
+            string = 'select pass_word from users where username="%s"'
+            arg2 = (user,)
+            cursor.execute(string % arg2)
+            checker2 = cursor.fetchone()
+            if checker2[0] == pass_word:
+                self.patient_button.config(state=NORMAL)
+                self.hospital_button.config(state=NORMAL)
+            else:
+                tkinter.messagebox.askyesno('Pharmacy Management System',
+                                            'Invalid Password! Do you want to retry?')
+                self.patient_button.config(state=DISABLED)
+                self.hospital_button.config(state=DISABLED)
+                self.Username.set('')
+                self.Password.set('')
+                self.TextUsername.focus()
         else:
             tkinter.messagebox.askyesno('Pharmacy Management System',
-                                        'Invalid Credentials! Do you want to retry?')
+                                        'Invalid Username! Do you want to retry?')
             self.patient_button.config(state=DISABLED)
             self.hospital_button.config(state=DISABLED)
             self.Username.set('')
