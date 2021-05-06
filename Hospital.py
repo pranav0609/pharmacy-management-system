@@ -1,9 +1,12 @@
+import MySQLdb
 from tkinter import *
 import tkinter.messagebox
 from tkinter import ttk
-import random
-import time
-import datetime
+
+connection = MySQLdb.connect(host='localhost', user='root', password='shubham1701')
+cursor = connection.cursor()
+string = "use pythondb"
+cursor.execute(string)
 
 
 class Hospital:
@@ -15,27 +18,51 @@ class Hospital:
         self.root.configure(background='powder blue')
 
         comboNameTablets = StringVar()
-        Ref = StringVar()
         Dose = StringVar()
         NumberOfTablets = StringVar()
         Lot = StringVar()
         MfgDate = StringVar()
         ExpDate = StringVar()
-        Dosage = StringVar()
+        Doctor = StringVar()
         SideEffects = StringVar()
         Information = StringVar()
         Reference = StringVar()
-        StorageAdvice = StringVar()
-        DrivingUsingMachines = StringVar()
+        PhoneNumber = StringVar()
+        RoomNumber = StringVar()
         DirectionsToUse = StringVar()
         PatientID = StringVar()
         AadharNumber = StringVar()
         PatientName = StringVar()
         PatientDOB = StringVar()
         PatientAddress = StringVar()
-        Prescription = StringVar()
 
         # ________________________________________________________________________________________
+        def FetchFromDatabase(medicine):
+            string = 'select * from medicines where medicine_name = "%s"'
+            args = (medicine,)
+            cursor.execute(string % args)
+            adder = cursor.fetchone()
+            Lot.set(adder[1])
+            MfgDate.set(adder[2])
+            ExpDate.set(adder[3])
+
+        def GetData():
+            if comboNameTablets.get() == "Paracetamol":
+                FetchFromDatabase('Paracetamol')
+            elif comboNameTablets.get() == "Ibuprofen":
+                FetchFromDatabase('Ibuprofen')
+            return
+
+        def ChangeLot(medicine_name):
+            temp_lot1 = int(Lot.get())
+            temp_quantity = int(NumberOfTablets.get())
+            temp_lot2 = int(temp_lot1 - temp_quantity)
+            Lot.set(temp_lot2)
+            string = 'update medicines set medicine_units = "%s" where medicine_name = "%s"'
+            args = (temp_lot2, medicine_name)
+            cursor.execute(string % args)
+            connection.commit()
+            return
 
         def iExit():
             iExit = tkinter.messagebox.askyesno("Hospital Management System",
@@ -45,43 +72,71 @@ class Hospital:
                 return
 
         def iPrescription():
-
-            self.txtPrescription.insert(END, "Name of Tablets:\t\t" + comboNameTablets.get() + "\n"
-                                        )
+            if (comboNameTablets == "" or PatientName == "" or PatientID == "" or PatientDOB == '' or AadharNumber == ''
+                    or RoomNumber == "" or PatientAddress == '' or PhoneNumber == '' or Dose == "" or NumberOfTablets == ''
+                    or Lot == '' or MfgDate == '' or ExpDate == '' or Doctor == '' or SideEffects == ''
+                    or Information == '' or Reference == '' or DirectionsToUse == ''):
+                tkinter.messagebox.showinfo("inert status", "all fields are not filled")
+            else:
+                self.txtPrescription.insert(END, "Name of Tablets:\t\t" + comboNameTablets.get() + "\n" +
+                                            "Patient Name:\t\t" + PatientName.get() + "\n" +
+                                            "Room Number:\t\t" + RoomNumber.get() + "\n" +
+                                            "Doctor:\t\t" + Doctor.get() + "\n" +
+                                            "Number of Tablets:\t\t" + NumberOfTablets.get() + "\n" +
+                                            "Side Effects:\t\t" + SideEffects.get() + "\n" +
+                                            "Further Information:\t\t" + Information.get() + "\n" +
+                                            "Directions to use:\t\t" + DirectionsToUse.get() + "\n")
             return
 
         def iPrescriptionData():
+            name_of_tablet = comboNameTablets.get()
+            number_of_tablets = int(NumberOfTablets.get())
+            patient_name = PatientName.get()
+            patient_id = PatientID.get()
+            patient_dob = PatientDOB.get()
+            adhaar = AadharNumber.get()
+            room_no = RoomNumber.get()
+            patient_address = PatientAddress.get()
+            ph_no = PhoneNumber.get()
             self.lblLabel = Label(FrameDetail, font=('arial', 10, 'bold'),
-                                  text='Name Of Tablets\tReference No.\tDosage\t'
-                                       'No. of Tablets\tLot\tMfg Date\tExp Date\t'
-                                       'Daily Dosage\tStorage Advice\tAdhaar Number\t'
-                                       'Patient Name\tDOB\tAddress', pady=8)
+                                  text='Name Of Tablets\t\t\tPatient Name\t\t\tReference No.\t\tDosage\t\t'
+                                       'Lot\t\tMfg Date\t\tExp Date\t\tPhone Number', pady=8)
             self.lblLabel.grid(row=0, column=0)
+            if (comboNameTablets == "" or PatientName == "" or PatientID == "" or PatientDOB == '' or AadharNumber == ''
+                    or RoomNumber == "" or PatientAddress == '' or PhoneNumber == '' or Dose == "" or NumberOfTablets == ''
+                    or Lot == '' or MfgDate == '' or ExpDate == '' or Doctor == '' or SideEffects == ''
+                    or Information == '' or Reference == '' or DirectionsToUse == ''):
+                tkinter.messagebox.showinfo("inert status", "all fields are not filled")
+            else:
+                self.txtFrameDetail.insert(END, comboNameTablets.get() + "\t\t\t" + PatientName.get() + "\t\t\t" +
+                                           Reference.get() + "\t\t" + Dose.get() + "\t\t" + Lot.get() + "\t\t" +
+                                           MfgDate.get() + "\t\t" + ExpDate.get() + "\t\t" +
+                                           PhoneNumber.get() + "\t\t" + "\n")
+                string = "insert into patients values('%s','%s','%s','%s','%s','%s','%s','%s','%s')"
+                args = (patient_name, patient_id, patient_dob, adhaar, room_no,
+                        patient_address, ph_no, name_of_tablet, number_of_tablets)
+                cursor.execute(string % args)
+                connection.commit()
+                ChangeLot(comboNameTablets.get())
+                tkinter.messagebox.showinfo("insert status", "patient inserted successfully")
+                cursor.close()
 
-            self.txtFrameDetail.insert(END, "\t" + comboNameTablets.get() + "\t\t" +
-                                       Dose.get() + "\t\t" + NumberOfTablets.get() + "\t" +
-                                       Lot.get() + "\t" + MfgDate.get() + "\t" +
-                                       ExpDate.get() + "\t" + Dosage.get() + "\t\t" +
-                                       StorageAdvice.get() + "\t" + AadharNumber.get() + "\t\t" +
-                                       PatientName.get() + "\t" + PatientDOB.get() + "\t" +
-                                       PatientAddress.get() + "\n")
             return
 
         def iReset():
             comboNameTablets.set("")
             self.comboNameTablet.current(0)
-            Ref.set("")
             Dose.set("")
             NumberOfTablets.set("")
             Lot.set("")
             MfgDate.set("")
             ExpDate.set("")
-            Dosage.set("")
+            Doctor.set("")
             SideEffects.set("")
             Information.set("")
             Reference.set("")
-            StorageAdvice.set("")
-            DrivingUsingMachines.set("")
+            PhoneNumber.set("")
+            RoomNumber.set("")
             DirectionsToUse.set("")
             PatientID.set("")
             AadharNumber.set("")
@@ -89,24 +144,22 @@ class Hospital:
             PatientDOB.set("")
             PatientAddress.set("")
             self.txtPrescription.delete("1.0", END)
-            # self.txtFrameDetail.delete("1.0", END)
             return
 
         def iDelete():
             comboNameTablets.set("")
             self.comboNameTablet.current(0)
-            Ref.set("")
             Dose.set("")
             NumberOfTablets.set("")
             Lot.set("")
             MfgDate.set("")
             ExpDate.set("")
-            Dosage.set("")
+            Doctor.set("")
             SideEffects.set("")
             Information.set("")
             Reference.set("")
-            StorageAdvice.set("")
-            DrivingUsingMachines.set("")
+            PhoneNumber.set("")
+            RoomNumber.set("")
             DirectionsToUse.set("")
             PatientID.set("")
             AadharNumber.set("")
@@ -148,7 +201,7 @@ class Hospital:
 
         DataFrameRight = LabelFrame(DataFrame, bd=10, width=450, height=250,
                                     padx=20, relief=RIDGE, font=('arial', 12, 'bold'),
-                                    text='Prescription')
+                                    text='Receipt')
         DataFrameRight.pack(side=RIGHT)
         # ________________________________________________________________________________________
 
@@ -179,10 +232,10 @@ class Hospital:
         self.txtReference.grid(row=1, column=1)
 
         self.lblStorageAdvice = Label(DataFrameLeft, font=('arial', 12, 'bold'),
-                                      text='Storage Advice:', padx=2)
+                                      text='Phone Number:', padx=2)
         self.lblStorageAdvice.grid(row=1, column=2, sticky=W)
         self.txtStorageAdvice = Entry(DataFrameLeft, font=('arial', 12, 'bold'),
-                                      textvariable=StorageAdvice)
+                                      textvariable=PhoneNumber)
         self.txtStorageAdvice.grid(row=1, column=3)
 
         self.lblDosage = Label(DataFrameLeft, font=('arial', 12, 'bold'),
@@ -192,12 +245,12 @@ class Hospital:
                                textvariable=Dose)
         self.txtDosage.grid(row=2, column=1)
 
-        self.lblDrivingMachines = Label(DataFrameLeft, font=('arial', 12, 'bold'),
-                                        text='Driving Machines:', padx=2)
-        self.lblDrivingMachines.grid(row=2, column=2, sticky=W)
-        self.txtDrivingMachines = Entry(DataFrameLeft, font=('arial', 12, 'bold'),
-                                        textvariable=DrivingUsingMachines)
-        self.txtDrivingMachines.grid(row=2, column=3)
+        self.lblRoomNumber = Label(DataFrameLeft, font=('arial', 12, 'bold'),
+                                   text='Room Number:', padx=2)
+        self.lblRoomNumber.grid(row=2, column=2, sticky=W)
+        self.txtRoomNumber = Entry(DataFrameLeft, font=('arial', 12, 'bold'),
+                                   textvariable=RoomNumber)
+        self.txtRoomNumber.grid(row=2, column=3)
 
         self.lblNumberOfTablets = Label(DataFrameLeft, font=('arial', 12, 'bold'),
                                         text='Number of Tablets:', padx=2)
@@ -256,10 +309,10 @@ class Hospital:
         self.txtPatientName.grid(row=6, column=3)
 
         self.lblDailyDose = Label(DataFrameLeft, font=('arial', 12, 'bold'),
-                                  text='Dosage:', padx=2)
+                                  text='Doctor:', padx=2)
         self.lblDailyDose.grid(row=7, column=0, sticky=W)
         self.txtDailyDose = Entry(DataFrameLeft, font=('arial', 12, 'bold'),
-                                  textvariable=Dosage)
+                                  textvariable=Doctor)
         self.txtDailyDose.grid(row=7, column=1)
 
         self.lblPatientDOB = Label(DataFrameLeft, font=('arial', 12, 'bold'),
@@ -288,31 +341,32 @@ class Hospital:
         self.txtPrescription.grid(row=0, column=0)
         # ________________________________________________________________________________________
         self.lblLabel = Label(FrameDetail, font=('arial', 10, 'bold'),
-                              text='Name Of Tablets\tReference No.\tDosage\t'
-                                   'No. of Tablets\tLot\tMfg Date\tExp Date\t'
-                                   'Daily Dosage\tStorage Advice\tAdhaar Number\t'
-                                   'Patient Name\tDOB\tAddress', pady=8)
+                              text='Name Of Tablets\t\t\tPatient Name\t\t\tReference No.\t\tDosage\t\t'
+                                   'Lot\t\tMfg Date\t\tExp Date\t\tPhone Number', pady=8)
         self.lblLabel.grid(row=0, column=0)
 
         self.txtFrameDetail = Text(FrameDetail, font=('arial', 12, 'bold'),
                                    width=141, height=4, padx=2, pady=4)
         self.txtFrameDetail.grid(row=1, column=0)
         # ________________________________________________________________________________________
-        self.btnPrescription = Button(ButtonFrame, text='Prescription', font=('arial', 12, 'bold'),
-                                      width=24, command=iPrescription)
-        self.btnPrescription.grid(row=0, column=0)
-        self.btnPrescriptionData = Button(ButtonFrame, text='Prescription Data', font=('arial', 12, 'bold'),
-                                          width=24, command=iPrescriptionData)
-        self.btnPrescriptionData.grid(row=0, column=1)
+        self.btnAddDetails = Button(ButtonFrame, text='Add Details', font=('arial', 12, 'bold'),
+                                    width=20, command=GetData)
+        self.btnAddDetails.grid(row=0, column=0)
+        self.btnPrescription = Button(ButtonFrame, text='Receipt', font=('arial', 12, 'bold'),
+                                      width=20, command=iPrescription)
+        self.btnPrescription.grid(row=0, column=1)
+        self.btnPrescriptionData = Button(ButtonFrame, text='Receipt Log', font=('arial', 12, 'bold'),
+                                          width=20, command=iPrescriptionData)
+        self.btnPrescriptionData.grid(row=0, column=2)
         self.btnDelete = Button(ButtonFrame, text='Delete', font=('arial', 12, 'bold'),
-                                width=24, command=iDelete)
-        self.btnDelete.grid(row=0, column=2)
+                                width=20, command=iDelete)
+        self.btnDelete.grid(row=0, column=3)
         self.btnReset = Button(ButtonFrame, text='Reset', font=('arial', 12, 'bold'),
-                               width=24, command=iReset)
-        self.btnReset.grid(row=0, column=3)
+                               width=20, command=iReset)
+        self.btnReset.grid(row=0, column=4)
         self.btnExit = Button(ButtonFrame, text='Exit', font=('arial', 12, 'bold'),
-                              width=24, command=iExit)
-        self.btnExit.grid(row=0, column=4)
+                              width=20, command=iExit)
+        self.btnExit.grid(row=0, column=5)
 
 
 root = Tk()
