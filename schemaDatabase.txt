@@ -1,0 +1,32 @@
+create database pythondb;
+use pythondb;
+set SQL_SAFE_UPDATES = 0;
+
+create table users(
+	username varchar(20),
+    pass_word varchar(20)
+);
+
+create table patients(
+	patient_name varchar(20),
+    patient_id varchar(20),
+    patient_dob varchar(10),
+    adhaar_number char(12),
+    patient_room varchar(20),
+    patient_address varchar(20),
+    patient_phno varchar(20),
+    medicine varchar(20),
+    quantity int
+);
+
+create table medicines(
+	medicine_name varchar(20),
+    medicine_units int,
+    mfg_date varchar(10),
+    exp_date varchar(10)
+);
+
+insert into users values("shubham","Shubham123");
+insert into users values("pranav","Pranav123");
+insert into medicines values("Paracetamol",500,"20/12/2018","20/12/2022");
+insert into medicines values("Ibuprofen",500,"13/06/2018","13/06/2022");
